@@ -23,13 +23,16 @@ class DockerClient(object):
         self.client = docker.from_env()
 
     def pull(self, name):
-        self.client.pull(name)
+        self.client.images.pull(name)
 
-    def start(self, name):
-        pass
+    def run(self, name):
+        return self.client.containers.run(name, detach=True)
 
     def kill(self, name):
-        pass
+        self.client.api.kill(name)
+
+    def remove(self, name):
+        self.client.images.remove(name)
 
     def get_images_status(self):
         # for x in self.client.containers.list():
@@ -53,17 +56,30 @@ class DockerClient(object):
                     try:
                         if container_status[0]["State"] == "running":
                             image_object.status = 0
-                            image_object.ports = " ".join([f"{x['PrivatePort']}/{x['Type']}" for x in container_status[0]["Ports"]])
+                            image_object.ports = " ".join(
+                                [f"{x['PrivatePort']}/{x['Type']}" for x in container_status[0]["Ports"]])
                             image_object.id = container_status[0]["Id"][:12]
                             image_object.uptime = container_status[0]["Status"]
                             image_object.ip = container_status[0]["NetworkSettings"]["Networks"]["bridge"]["IPAddress"]
                         else:
                             image_object.status = 1
+                            image_object.ports = ""
+                            image_object.id = ""
+                            image_object.uptime = ""
+                            image_object.ip = ""
                     except IndexError:
                         image_object.status = 1
+                        image_object.ports = ""
+                        image_object.id = ""
+                        image_object.uptime = ""
+                        image_object.ip = ""
 
             except docker.errors.ImageNotFound:
                 image_object.status = 2
+                image_object.ports = ""
+                image_object.id = ""
+                image_object.uptime = ""
+                image_object.ip = ""
 
             result.append(image_object)
         return result

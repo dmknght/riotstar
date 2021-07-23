@@ -28,12 +28,7 @@ Note that the RouterSploit Framework is provided as is, and is a royalty free op
 Feel free to modify, use, change, market, do whatever you want with it as long as you give the appropriate credit.
 """
 import readline
-# import os
-# import importlib
-# from owasp_zsc.new_cores.base_module import GLOBAL_OPTS, BasePayload
-# from owasp_zsc.new_cores import print_table
 from cli.print_utils import *
-import cores
 from cores.docker_utils import DockerClient
 
 
@@ -43,6 +38,9 @@ class BaseInterpreter(object):
     def __init__(self):
         self.setup()
         self.banner = ""
+
+    def refresh(self):
+        pass
 
     def setup(self):
         """ Initialization of third-party libraries
@@ -96,6 +94,7 @@ class BaseInterpreter(object):
                     break
                 command_handler = self.get_command_handler(command)
                 command_handler(args)
+                self.refresh()
             except KeyboardInterrupt:
                 print("")
             except AttributeError:
@@ -162,9 +161,9 @@ class BaseInterpreter(object):
 
 
 class Interpreter(BaseInterpreter):
+    # TODO support start / stop / remove, ... multiple files
     def __init__(self):
         super(Interpreter, self).__init__()
-        # TODO get all docker images and all running. We must have refresher for it
         self.raw_prompt_template = None
         self.module_prompt_template = None
         self.not_installed = ()
@@ -176,16 +175,16 @@ class Interpreter(BaseInterpreter):
             "installed",
         )
         self.main_commands = (
-            ("about", "Show information of program"),
             ("show", "Show things TODO edit here"),
             ("run", "Start a docker image"),
             ("kill", "Kill a docker image"),
+            ("killall", "Kill all"),
+            ("pull", "pull"),
             ("help", "Show help menu"),
             ("exit", "Exit program"),
         )
         self.manager = DockerClient()
         self.refresh()
-        # self.all_modules = self.get_modules()
 
     def refresh(self):
         self.running, self.installed, self.not_installed = (), (), ()
@@ -203,11 +202,8 @@ class Interpreter(BaseInterpreter):
         Adding extras prefix (extras.name) if current_module attribute is set.
         :return: prompt string with appropriate extras prefix.
         """
-        # if self.current_module:
-        #     return f"{color('cyan')}ZSC{color('reset')}[{color('purple')}{self.current_module}{color('reset')}]> "
-        # else:
 
-        p = f"┌[Installed: {len(self.installed)}]-[Running: {len(self.running)}]\n"
+        p = f"┌[Installed: {len(self.installed) + len(self.running)}]-[Running: {len(self.running)}]\n"
         p += f"└╼{color('cyan')}RiotStar{color('reset')}> "
         return p
 
@@ -219,23 +215,57 @@ class Interpreter(BaseInterpreter):
         if not args[0]:
             print("Image name is required to start")
         else:
-            link = [image.repo for image in self.installed if image.name == args[0]]
-            result = self.manager.client.containers.run(link[0], detach=True)
-            result.logs()
-            print(result)
-            self.refresh()
-            # TODO show status of image like IP
+            repo = [image.repo for image in self.installed if image.name == args[0]]
+            if repo:
+                # TODO check if image is running or not. If not, pull it
+                result = self.manager.run(repo[0])
+                if not result:
+                    print(f"Failed to run {args[0]}")
+                else:
+                    print("Containers started in background")
+            else:
+                print(f"Invalid container {args[0]}. Check if container is valid or running.")
 
     def command_kill(self, *args, **kwargs):
-        # TODO kill running docker
-        self.refresh()
+        if not args[0]:
+            print("Nothing to kill")
+        else:
+            target_id = [x.id for x in self.running if x.name == args[0]]
+            if target_id:
+                self.manager.kill(target_id[0])
+            else:
+                print(f"Invalid name {args[0]}")
 
-    def command_kill_all(self):
-        pass
+    def command_killall(self, *args, **kwargs):
+        for image in self.running:
+            self.manager.kill(image.id)
 
     def command_pull(self, *args, **kwargs):
-        # TODO pull uninstalled image
-        self.refresh()
+        if not args[0]:
+            print("Nothing to pull")
+        else:
+            repo = [image.repo for image in self.not_installed if image.name == args[0]]
+            if repo:
+                print(f"Pulling {args[0]} from {repo[0]}. Please wait...")
+                self.manager.pull(repo[0])
+            else:
+                print("Invalid name")
+
+    def command_prune(self, *args, **kwargs):
+        print("Not supported")
+        pass
+
+    def command_remove(self, *args, **kwargs):
+        if not args[0]:
+            print("Nothing to pull")
+        else:
+            repo = [image.repo for image in self.installed if image.name == args[0]]
+            if repo:
+                self.manager.remove(repo)
+
+    def command_restart(self, *args, **kwargs):
+        print("not supported")
+        pass
 
     def _show_all(self):
         self.refresh()
@@ -261,12 +291,10 @@ class Interpreter(BaseInterpreter):
             headers = ("Name", "ID", "IP", "Port", "Up time")
             # FIXME empty uptime
             print_table(headers, *[(x.name, x.id, x.ip, x.ports, x.up_time) for x in self.running])
-    # def _show_status(self, *args, **kwargs):
-    #     # TODO show current status of an image
-    #     pass
 
-    # def command_list(self, *args, **kwargs):
-    #     self.client.images.list()
+    # def _show_status(self, *args, **kwargs):
+    #     # show current status of an image
+    #     pass
 
     def command_show(self, *args, **kwargs):
         sub_command = args[0]
