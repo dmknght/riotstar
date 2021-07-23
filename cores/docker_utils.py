@@ -16,6 +16,7 @@ class DockerImage(object):
         self.ports = ""
         self.up_time = ""
         self.ip = ""
+        self.size = ""
 
 
 class DockerClient(object):
@@ -50,6 +51,7 @@ class DockerClient(object):
             try:
                 image_status = self.client.images.get(image_object.repo)
                 if image_status:
+                    image_object.size = image_status.attrs["Size"]
                     # Use API to show status of current image dirrectly
                     # We use repo name as filterer
                     # Return value is a list of dict
@@ -83,6 +85,7 @@ class DockerClient(object):
                 image_object.id = ""
                 image_object.uptime = ""
                 image_object.ip = ""
+                image_object.size = ""
 
             result.append(image_object)
         return result
