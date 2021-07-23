@@ -1,5 +1,5 @@
 # https://github.com/threat9/routersploit/blob/master/routersploit/interpreter.py
-# Modified by Nong Hoang "DmKnght" Tu for new Owasp ZSC
+# Modified by Nong Hoang "DmKnght" Tu for new RiotStar
 """
 Copyright 2018, The RouterSploit Framework (RSF) by Threat9
 All rights reserved.
@@ -28,12 +28,13 @@ Note that the RouterSploit Framework is provided as is, and is a royalty free op
 Feel free to modify, use, change, market, do whatever you want with it as long as you give the appropriate credit.
 """
 import readline
-import os
-import importlib
+# import os
+# import importlib
 # from owasp_zsc.new_cores.base_module import GLOBAL_OPTS, BasePayload
 # from owasp_zsc.new_cores import print_table
 from cli.print_utils import *
 import cores
+from cores.docker_utils import DockerClient
 
 
 class BaseInterpreter(object):
@@ -164,9 +165,11 @@ class Interpreter(BaseInterpreter):
     def __init__(self):
         super(Interpreter, self).__init__()
         # TODO get all docker images and all running. We must have refresher for it
-        self.current_module = None
         self.raw_prompt_template = None
         self.module_prompt_template = None
+        self.not_installed = ()
+        self.installed = ()
+        self.running = ()
         self.show_commands = (
             "all",
             "running",
@@ -180,8 +183,22 @@ class Interpreter(BaseInterpreter):
             ("help", "Show help menu"),
             ("exit", "Exit program"),
         )
+        self.client = DockerClient()
+        self.refresh()
         # self.all_modules = self.get_modules()
 
+    def refresh(self):
+        try:
+            import traceback
+            for image in self.client.get_images_status():
+                if image.status == 0:
+                    status = "Running"
+                elif image.status == 1:
+                    self.installed += (image, )
+                else:
+                    self.not_installed += (image, )
+        except:
+            traceback.print_exc()
     # def get_modules(self):
     #     module_path = payloads.__path__[0] + "/"
     #     ret_modules = []
@@ -202,15 +219,7 @@ class Interpreter(BaseInterpreter):
         # if self.current_module:
         #     return f"{color('cyan')}ZSC{color('reset')}[{color('purple')}{self.current_module}{color('reset')}]> "
         # else:
-        return f"{color('cyan')}ZSC{color('reset')}> "
-
-    def suggested_commands(self):
-        """ Entry point for intelligent tab completion.
-        Based on state of interpreter this method will return intelligent suggestions.
-        :return: list of most accurate command suggestions
-        """
-        if not self.current_module:
-            return [x[0] for x in self.main_commands]
+        return f"{color('cyan')}RiotStar{color('reset')}> "
 
     def command_help(self, *args, **kwargs):
         for command, descriptions in self.main_commands:
@@ -292,24 +301,47 @@ class Interpreter(BaseInterpreter):
     #         print(f"You can't set option '{key}'.\n"
     #               f"Available options: {self.current_module.options}")
     #
-    def command_run(self):
+    def command_run(self, *args, **kwargs):
         # TODO run installed docker
         pass
 
-    def command_kill(self):
+    def command_kill(self, *args, **kwargs):
         # TODO kill running docker
         pass
 
+    def command_pull(self, *args, **kwargs):
+        # TODO pull uninstalled image
+        pass
+
     def _show_all(self):
-        headers = ("Name", "Description") # TODO status
-        for image_info in cores.vuln_images:
-            print_table(headers, image_info)
+        headers = ("Name", "Status", "Description")
+        status_all = [(x.name, "Running", x.description) for x in self.running]
+        status_all += [(x.name, "Installed", x.description) for x in self.installed]
+        status_all += [(x.name, "Not Installed", x.description) for x in self.not_installed]
+        print_table(headers, *status_all)
 
     def _show_installed(self):
-        print("not implemented")
+        # TODO think about show size or something like that
+        if len(self.installed) == 0:
+            print("  No images was installed")
+        else:
+            headers = ("Name", "Description")
+            print_table(headers, *[(x.name, x.description) for x in self.installed])
 
     def _show_running(self):
-        print("not implemented")
+        # TODO think about show IP address
+        if len(self.running) == 0:
+            print("  No running")
+        else:
+            headers = ("Name", "Description")
+            print_table(headers, *[(x.name, x.description) for x in self.running])
+
+    def _show_status(self, *args, **kwargs):
+        # TODO show current status of an image
+        pass
+
+    # def command_list(self, *args, **kwargs):
+    #     self.client.images.list()
 
     def command_show(self, *args, **kwargs):
         sub_command = args[0]
