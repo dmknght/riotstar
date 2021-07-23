@@ -188,27 +188,14 @@ class Interpreter(BaseInterpreter):
         # self.all_modules = self.get_modules()
 
     def refresh(self):
-        try:
-            import traceback
-            for image in self.manager.get_images_status():
-                if image.status == 0:
-                    self.running += (image, )
-                elif image.status == 1:
-                    self.installed += (image, )
-                else:
-                    self.not_installed += (image, )
-        except:
-            traceback.print_exc()
-    # def get_modules(self):
-    #     module_path = payloads.__path__[0] + "/"
-    #     ret_modules = []
-    #     for root, dirs, files in os.walk(module_path):
-    #         _, package, root = root.rpartition(module_path.replace("/", os.sep))
-    #         root = root.replace(os.sep, ".")
-    #         files = filter(lambda x: not x.startswith("__") and x.endswith(".py"), files)
-    #         ret_modules.extend(map(lambda x: ".".join((root, os.path.splitext(x)[0])), files))
-    #
-    #     return ret_modules
+        self.running, self.installed, self.not_installed = (), (), ()
+        for image in self.manager.get_images_status():
+            if image.status == 0:
+                self.running += (image, )
+            elif image.status == 1:
+                self.installed += (image, )
+            else:
+                self.not_installed += (image, )
 
     @property
     def prompt(self):
@@ -219,89 +206,16 @@ class Interpreter(BaseInterpreter):
         # if self.current_module:
         #     return f"{color('cyan')}ZSC{color('reset')}[{color('purple')}{self.current_module}{color('reset')}]> "
         # else:
-        return f"{color('cyan')}RiotStar{color('reset')}> "
+
+        p = f"┌[Installed: {len(self.installed)}]-[Running: {len(self.running)}]\n"
+        p += f"└╼{color('cyan')}RiotStar{color('reset')}> "
+        return p
 
     def command_help(self, *args, **kwargs):
         for command, descriptions in self.main_commands:
             print(f"  {command:15}  {descriptions}")
 
-    # def command_search(self, *args, **kwargs):
-    #     pass
-
-    # def complete_use(self, text, *args, **kwargs):
-    #     if text.endswith(".") or not text:
-    #         # Try to suggest new layer
-    #         return [x.replace(text, "").split(".")[0] for x in self.all_modules if x.startswith(text)]
-    #     else:
-    #         # Try to suggest maximum layer
-    #         return [x for x in self.all_modules if x.startswith(text)]
-
-    # def command_use(self, module_path, *args, **kwargs):
-    #     module_path = ".".join(("owasp_zsc.modules.payloads", module_path))
-    #     try:
-    #         module = importlib.import_module(module_path)
-    #         self.current_module = getattr(module, "Module")()
-    #     except:
-    #         print(self.current_module.__attr)
-
-    # def command_run(self, *args, **kwargs):
-    #     if not self.current_module:
-    #         return
-    #     self.current_module.run()
-
-    # def command_set(self, *args, **kwargs):
-    #     if not self.current_module:
-    #         return
-    #     key, _, value = args[0].partition(" ")
-    #     if key in self.current_module.options:
-    #         if str(self.current_module) == "payloads/obfuscator/obfuscate" and key == "file":
-    #             # Specific set for extras obfuscate
-    #             # Check if file exists
-    #             if not os.path.isfile(value):
-    #                 alert.error(f"Error: {value} is not a file\n")
-    #                 return
-    #             # Parse file extension to set arguments automatically
-    #             file_name, file_ext = os.path.splitext(value)
-    #             # If no extension, we try shebang. Have to deal with binary files
-    #             if not file_ext:
-    #                 alert.error(f"{value} might be a valid file. But shebang parsing isn't supported.")
-    #             else:
-    #                 if file_ext == ".py":
-    #                     module_type = "python"
-    #                 elif file_ext.lower() == ".js":
-    #                     module_type = "javascript"
-    #                 elif file_ext.lower() == ".pl":
-    #                     module_type = "perl"
-    #                 elif file_ext.lower() == ".rb":
-    #                     module_type = "ruby"
-    #                 elif file_ext.lower().startswith(".php"):
-    #                     module_type = "php"
-    #                 else:
-    #                     alert.error("Unsupported language\n")
-    #                     return
-    #
-    #                 # Set module_type
-    #
-    #                 alert.info(f"Detected {module_type}")
-    #                 setattr(self.current_module, "type", module_type)
-    #                 self.current_module.module_attributes["type"][0] = module_type
-    #                 # Get valid submodules for each extras types
-    #                 from owasp_zsc.libs import obfuscate
-    #                 available_modules = [os.path.splitext(x)[0] for x in
-    #                                      os.listdir(obfuscate.__path__[0] + "/" + module_type) if
-    #                                      x.endswith(".py") and not x.startswith("__")]
-    #                 alert.info(f"Modules for {module_type}: {available_modules}")
-    #
-    #         setattr(self.current_module, key, value)
-    #         self.current_module.module_attributes[key][0] = value
-    #         if kwargs.get("glob", False):
-    #             GLOBAL_OPTS[key] = value
-    #         print(f"{key} => {value}")  # TODO fix here when value failed to set
-    #     else:
-    #         print(f"You can't set option '{key}'.\n"
-    #               f"Available options: {self.current_module.options}")
-    #
-    def command_start(self, *args, **kwargs):
+    def command_run(self, *args, **kwargs):
         if not args[0]:
             print("Image name is required to start")
         else:
@@ -316,20 +230,23 @@ class Interpreter(BaseInterpreter):
         # TODO kill running docker
         self.refresh()
 
+    def command_kill_all(self):
+        pass
+
     def command_pull(self, *args, **kwargs):
         # TODO pull uninstalled image
         self.refresh()
 
     def _show_all(self):
-        # TODO refresh it first
+        self.refresh()
         headers = ("Name", "Status", "Description")
         status_all = [(x.name, "Running", x.description) for x in self.running]
         status_all += [(x.name, "Installed", x.description) for x in self.installed]
-        status_all += [(x.name, "Not Installed", x.description) for x in self.not_installed]
+        status_all += [(x.name, "N/A", x.description) for x in self.not_installed]
         print_table(headers, *status_all)
 
     def _show_installed(self):
-        # TODO think about show size or something like that
+        self.refresh()
         if len(self.installed) == 0:
             print("  No images was installed")
         else:
@@ -337,16 +254,16 @@ class Interpreter(BaseInterpreter):
             print_table(headers, *[(x.name, x.description) for x in self.installed])
 
     def _show_running(self):
-        # TODO think about show IP address
+        self.refresh()
         if len(self.running) == 0:
             print("  No running")
         else:
-            headers = ("Name", "Description")
-            print_table(headers, *[(x.name, x.description) for x in self.running])
-
-    def _show_status(self, *args, **kwargs):
-        # TODO show current status of an image
-        pass
+            headers = ("Name", "ID", "IP", "Port", "Up time")
+            # FIXME empty uptime
+            print_table(headers, *[(x.name, x.id, x.ip, x.ports, x.up_time) for x in self.running])
+    # def _show_status(self, *args, **kwargs):
+    #     # TODO show current status of an image
+    #     pass
 
     # def command_list(self, *args, **kwargs):
     #     self.client.images.list()
@@ -364,7 +281,7 @@ class Interpreter(BaseInterpreter):
         else:
             return self.show_commands
 
-    def complete_start(self, text, *args, **kwargs):
+    def complete_run(self, text, *args, **kwargs):
         suggestions = [x.name for x in self.installed]
         if text:
             return [command for command in suggestions if command.startswith(text)]
