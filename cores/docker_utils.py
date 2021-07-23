@@ -31,6 +31,9 @@ class DockerClient(object):
     def kill(self, name):
         self.client.api.kill(name)
 
+    def prune(self):
+        self.client.containers.prune()
+
     def remove(self, name):
         self.client.images.remove(name)
 
