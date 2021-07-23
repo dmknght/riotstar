@@ -47,9 +47,12 @@ class DockerClient(object):
                     # Dict value to check: State: is running or not
                     # Status: Up time
                     container_status = self.client.api.containers(filters={"ancestor": image_object.repo})
-                    if container_status[0]["State"] == "running":
-                        image_object.status = 0
-                    else:
+                    try:
+                        if container_status[0]["State"] == "running":
+                            image_object.status = 0
+                        else:
+                            image_object.status = 1
+                    except IndexError:
                         image_object.status = 1
 
             except docker.errors.ImageNotFound:
