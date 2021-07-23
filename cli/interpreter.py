@@ -178,7 +178,7 @@ class Interpreter(BaseInterpreter):
         self.main_commands = (
             ("about", "Show information of program"),
             ("show", "Show things TODO edit here"),
-            ("start", "Start a docker image"),
+            ("run", "Start a docker image"),
             ("kill", "Kill a docker image"),
             ("help", "Show help menu"),
             ("exit", "Exit program"),
@@ -355,3 +355,24 @@ class Interpreter(BaseInterpreter):
             return [command for command in self.show_commands if command.startswith(text)]
         else:
             return self.show_commands
+
+    def complete_run(self, text, *args, **kwargs):
+        suggestions = [x.name for x in self.installed]
+        if text:
+            return [command for command in suggestions if command.startswith(text)]
+        else:
+            return suggestions
+
+    def complete_pull(self, text, *args, **kwargs):
+        suggestions = [x.name for x in self.not_installed]
+        if text:
+            return [command for command in suggestions if command.startswith(text)]
+        else:
+            return suggestions
+
+    def complete_kill(self, text, *args, **kwargs):
+        suggestions = [x.name for x in self.running]
+        if text:
+            return [command for command in suggestions if command.startswith(text)]
+        else:
+            return suggestions
