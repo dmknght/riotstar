@@ -161,7 +161,6 @@ class BaseInterpreter(object):
 
 
 class Interpreter(BaseInterpreter):
-    # TODO support start / stop / remove, ... multiple files
     def __init__(self):
         super(Interpreter, self).__init__()
         self.raw_prompt_template = None
@@ -215,28 +214,36 @@ class Interpreter(BaseInterpreter):
         if not args[0]:
             print("Image name is required to start")
         else:
-            for name in args:
+            self.refresh()
+            for name in args[0].split():
                 repo = [image.repo for image in self.installed if image.name == name]
                 if repo:
-                    # TODO check if image is running or not. If not, pull it
                     result = self.manager.run(repo[0])
                     if not result:
                         print(f"Failed to run {name}")
                     else:
                         print("Containers started in background")
                 else:
-                    print(f"Invalid container {name}. Check if container is valid or running.")
+                    if name in [x.name for x in self.running]:
+                        print(f"{name} is running")
+                    elif name in [x.name for x in self.not_installed]:
+                        print(f"{name} is not installed. Pulling...")
+                        self.command_pull(name)
+                        # print("To prevent infinity loop, program doesn't run this image. Please do it manually.")
+                        self.command_run(name)
+                    else:
+                        print(f"Invalid name {name}.")
 
     def command_kill(self, *args, **kwargs):
         if not args[0]:
             print("Nothing to kill")
         else:
-            for name in args:
+            for name in args[0].split():
                 target_id = [x.id for x in self.running if x.name == name]
                 if target_id:
                     self.manager.kill(target_id[0])
                 else:
-                    print(f"Invalid name name")
+                    print(f"Invalid name {name} to kill")
 
     def command_killall(self, *args, **kwargs):
         for image in self.running:
@@ -246,7 +253,7 @@ class Interpreter(BaseInterpreter):
         if not args[0]:
             print("Nothing to pull")
         else:
-            for name in args:
+            for name in args[0].split():
                 repo = [image.repo for image in self.not_installed if image.name == name]
                 if repo:
                     print(f"Pulling {args[0]} from {repo[0]}. Please wait...")
@@ -262,13 +269,16 @@ class Interpreter(BaseInterpreter):
         if not args[0]:
             print("Nothing to pull")
         else:
-            repo = [image.repo for image in self.installed if image.name == args[0]]
-            if repo:
-                self.manager.remove(repo)
+            for name in args[0].split():
+                repo = [image.repo for image in self.installed if image.name == name]
+                if repo:
+                    self.manager.remove(repo[0])
+                else:
+                    print(f"Invalid name {name} to remove")
 
-    def command_restart(self, *args, **kwargs):
-        print("not supported")
-        pass
+    # def command_restart(self, *args, **kwargs):
+    #     print("not supported")
+    #     pass
 
     def _show_all(self):
         self.refresh()

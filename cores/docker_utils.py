@@ -23,7 +23,7 @@ class DockerClient(object):
         self.client = docker.from_env()
 
     def pull(self, name):
-        self.client.images.pull(name)
+        return self.client.images.pull(name)
 
     def run(self, name):
         return self.client.containers.run(name, detach=True)
@@ -35,7 +35,7 @@ class DockerClient(object):
         self.client.containers.prune()
 
     def remove(self, name):
-        self.client.images.remove(name)
+        self.client.images.remove(name, force=True)
 
     def get_images_status(self):
         # for x in self.client.containers.list():
