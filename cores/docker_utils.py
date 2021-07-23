@@ -7,11 +7,12 @@ class DockerImage(object):
     # 0. Running
     # 1. Not running
     # 2. Not installed
-    def __init__(self, name, description, link):
+    def __init__(self, name, description, image):
         self.name = name
         self.description = description
-        self.link = link
+        self.repo = image
         self.status = 2
+        # self.id = ""
 
 
 class DockerClient(object):
@@ -28,17 +29,29 @@ class DockerClient(object):
         pass
 
     def get_images_status(self):
+        # for x in self.client.containers.list():
+        #     print(x.image.attrs)
         result = []
         for image in cores.lab_images:
             image_object = DockerImage(
                 name=image[0],
                 description=image[1],
-                link=image[2],
+                image=image[2],
             )
             try:
-                if self.client.images.get(image_object.link):
-                    # TODO check if it is running
-                    image_object.status = 1
+                image_status = self.client.images.get(image_object.repo)
+                if image_status:
+                    # Use API to show status of current image dirrectly
+                    # We use repo name as filterer
+                    # Return value is a list of dict
+                    # Dict value to check: State: is running or not
+                    # Status: Up time
+                    container_status = self.client.api.containers(filters={"ancestor": image_object.repo})
+                    if container_status[0]["State"] == "running":
+                        image_object.status = 0
+                    else:
+                        image_object.status = 1
+
             except docker.errors.ImageNotFound:
                 image_object.status = 2
 

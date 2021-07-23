@@ -183,16 +183,16 @@ class Interpreter(BaseInterpreter):
             ("help", "Show help menu"),
             ("exit", "Exit program"),
         )
-        self.client = DockerClient()
+        self.manager = DockerClient()
         self.refresh()
         # self.all_modules = self.get_modules()
 
     def refresh(self):
         try:
             import traceback
-            for image in self.client.get_images_status():
+            for image in self.manager.get_images_status():
                 if image.status == 0:
-                    status = "Running"
+                    self.running += (image, )
                 elif image.status == 1:
                     self.installed += (image, )
                 else:
@@ -301,19 +301,27 @@ class Interpreter(BaseInterpreter):
     #         print(f"You can't set option '{key}'.\n"
     #               f"Available options: {self.current_module.options}")
     #
-    def command_run(self, *args, **kwargs):
-        # TODO run installed docker
-        pass
+    def command_start(self, *args, **kwargs):
+        if not args[0]:
+            print("Image name is required to start")
+        else:
+            link = [image.repo for image in self.installed if image.name == args[0]]
+            result = self.manager.client.containers.run(link[0], detach=True)
+            result.logs()
+            print(result)
+            self.refresh()
+            # TODO show status of image like IP
 
     def command_kill(self, *args, **kwargs):
         # TODO kill running docker
-        pass
+        self.refresh()
 
     def command_pull(self, *args, **kwargs):
         # TODO pull uninstalled image
-        pass
+        self.refresh()
 
     def _show_all(self):
+        # TODO refresh it first
         headers = ("Name", "Status", "Description")
         status_all = [(x.name, "Running", x.description) for x in self.running]
         status_all += [(x.name, "Installed", x.description) for x in self.installed]
@@ -356,7 +364,7 @@ class Interpreter(BaseInterpreter):
         else:
             return self.show_commands
 
-    def complete_run(self, text, *args, **kwargs):
+    def complete_start(self, text, *args, **kwargs):
         suggestions = [x.name for x in self.installed]
         if text:
             return [command for command in suggestions if command.startswith(text)]
