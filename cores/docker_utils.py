@@ -12,7 +12,10 @@ class DockerImage(object):
         self.description = description
         self.repo = image
         self.status = 2
-        # self.id = ""
+        self.id = ""
+        self.ports = ""
+        self.up_time = ""
+        self.ip = ""
 
 
 class DockerClient(object):
@@ -50,6 +53,10 @@ class DockerClient(object):
                     try:
                         if container_status[0]["State"] == "running":
                             image_object.status = 0
+                            image_object.ports = " ".join([f"{x['PrivatePort']}/{x['Type']}" for x in container_status[0]["Ports"]])
+                            image_object.id = container_status[0]["Id"][:12]
+                            image_object.uptime = container_status[0]["Status"]
+                            image_object.ip = container_status[0]["NetworkSettings"]["Networks"]["bridge"]["IPAddress"]
                         else:
                             image_object.status = 1
                     except IndexError:
