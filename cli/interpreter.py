@@ -302,8 +302,7 @@ class Interpreter(BaseInterpreter):
             print("  No running")
         else:
             headers = ("Name", "ID", "IP", "Port", "Up time")
-            # FIXME empty uptime
-            print_table(headers, *[(x.name, x.id, x.ip, x.ports, x.up_time) for x in self.running])
+            print_table(headers, *[(x.name, x.id, x.ip, x.ports, x.uptime) for x in self.running])
 
     # def _show_status(self, *args, **kwargs):
     #     # show current status of an image
