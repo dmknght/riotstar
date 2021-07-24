@@ -174,11 +174,11 @@ class Interpreter(BaseInterpreter):
             "installed",
         )
         self.main_commands = (
-            ("show", "Show things TODO edit here"),
-            ("run", "Start a docker image"),
-            ("kill", "Kill a docker image"),
-            ("killall", "Kill all"),
-            ("pull", "pull"),
+            ("show", "Show information about images / containers"),
+            ("run", "Start docker containers"),
+            ("kill", "Kill running docker containers"),
+            ("killall", "Kill all running docker containers"),
+            ("pull", "Pull images"),
             ("help", "Show help menu"),
             ("exit", "Exit program"),
         )
