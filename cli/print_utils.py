@@ -2,7 +2,7 @@ import sys
 
 
 def color(user_color):
-    if user_color == 'reset':
+    if user_color == 'rs':
         return '\033[0m'
     if user_color == 'grey':
         return '\033[1;30m'
@@ -20,24 +20,24 @@ def color(user_color):
         return '\033[1;36m'
     if user_color == 'white':
         return '\033[1;37m'
+    elif user_color == 'lred':
+        return '\033[1;91m'
+    elif user_color == 'lblue':
+        return '\033[1;94m'
     else:
         return ''
 
 
 def info(content):
-    sys.stdout.write(f"{color.color('yellow')} [+] {color.color('green')} {content} {color.color('reset')}\n")
-
-
-def write(content):
-    sys.stdout.write(content)
+    sys.stdout.write(f"[{color('green')}+{color('rs')}] {color('white')}{content}{color('rs')}\n")
 
 
 def warn(content):
-    sys.stdout.write(f"{color.color('red')} [!] {color.color('yellow')} {content} {color.color('reset')}\n")
+    sys.stdout.write(f"[{color('yellow')}!{color('rs')}] {color('yellow')}{content}{color('rs')}\n")
 
 
 def error(content):
-    sys.stdout.write(content)
+    sys.stdout.write(f"[{color('red')}x{color('rs')}] {color('lred')}{content}{color('rs')}\n")
 
 
 def print_table(headers, *args, **kwargs) -> None:

@@ -202,8 +202,9 @@ class Interpreter(BaseInterpreter):
         :return: prompt string with appropriate extras prefix.
         """
 
-        p = f"┌[Installed: {len(self.installed) + len(self.running)}]-[Running: {len(self.running)}]\n"
-        p += f"└╼{color('cyan')}RiotStar{color('reset')}> "
+        p = f"┌[Installed: {color('cyan')}{len(self.installed) + len(self.running)}{color('rs')}"
+        p += f"]-[Running: {color('purple')}{len(self.running)}{color('rs')}]\n"
+        p += f"└╼{color('lblue')}RiotStar{color('rs')}> "
         return p
 
     def command_help(self, *args, **kwargs):
@@ -212,7 +213,7 @@ class Interpreter(BaseInterpreter):
 
     def command_run(self, *args, **kwargs):
         if not args[0]:
-            print("Image name is required to start")
+            error("Image name is required to start")
         else:
             self.refresh()
             for name in args[0].split():
@@ -220,30 +221,30 @@ class Interpreter(BaseInterpreter):
                 if repo:
                     result = self.manager.run(repo[0])
                     if not result:
-                        print(f"Failed to run {name}")
+                        error(f"Failed to run {name}")
                     else:
-                        print("Containers started in background")
+                        info("Containers started in background")
                 else:
                     if name in [x.name for x in self.running]:
-                        print(f"{name} is running")
+                        warn(f"{name} is running")
                     elif name in [x.name for x in self.not_installed]:
-                        print(f"{name} is not installed. Pulling...")
+                        warn(f"{name} is not installed. Pulling...")
                         self.command_pull(name)
                         # print("To prevent infinity loop, program doesn't run this image. Please do it manually.")
                         self.command_run(name)
                     else:
-                        print(f"Invalid name {name}.")
+                        error(f"Invalid name {name}.")
 
     def command_kill(self, *args, **kwargs):
         if not args[0]:
-            print("Nothing to kill")
+            error("Container names are required to kill")
         else:
             for name in args[0].split():
                 target_id = [x.id for x in self.running if x.name == name]
                 if target_id:
                     self.manager.kill(target_id[0])
                 else:
-                    print(f"Invalid name {name} to kill")
+                    error(f"Invalid name {name} to kill")
 
     def command_killall(self, *args, **kwargs):
         for image in self.running:
@@ -251,30 +252,30 @@ class Interpreter(BaseInterpreter):
 
     def command_pull(self, *args, **kwargs):
         if not args[0]:
-            print("Nothing to pull")
+            error("Image names are required to pull")
         else:
             for name in args[0].split():
                 repo = [image.repo for image in self.not_installed if image.name == name]
                 if repo:
-                    print(f"Pulling {args[0]} from {repo[0]}. Please wait...")
+                    info(f"Pulling {args[0]} from {repo[0]}. Please wait...")
                     self.manager.pull(repo[0])
                 else:
-                    print(f"Invalid name {name}")
+                    error(f"Invalid name {name}")
 
     def command_prune(self, *args, **kwargs):
         self.manager.prune()
-        print("Completed")
+        info("Completed")
 
     def command_remove(self, *args, **kwargs):
         if not args[0]:
-            print("Nothing to pull")
+            error("Image names are required to remove")
         else:
             for name in args[0].split():
                 repo = [image.repo for image in self.installed if image.name == name]
                 if repo:
                     self.manager.remove(repo[0])
                 else:
-                    print(f"Invalid name {name} to remove")
+                    error(f"Invalid name {name} to remove")
 
     # def command_restart(self, *args, **kwargs):
     #     print("not supported")
@@ -291,7 +292,7 @@ class Interpreter(BaseInterpreter):
     def _show_installed(self):
         self.refresh()
         if len(self.installed) == 0:
-            print("  No images was installed")
+            warn("No images were installed")
         else:
             headers = ("Name", "Description", "Size")
             print_table(headers, *[(x.name, x.description, x.size) for x in self.installed])
@@ -299,7 +300,7 @@ class Interpreter(BaseInterpreter):
     def _show_running(self):
         self.refresh()
         if len(self.running) == 0:
-            print("  No running")
+            warn("No containers is running")
         else:
             headers = ("Name", "ID", "IP", "Port", "Up time")
             print_table(headers, *[(x.name, x.id, x.ip, x.ports, x.uptime) for x in self.running])
@@ -313,7 +314,7 @@ class Interpreter(BaseInterpreter):
         try:
             getattr(self, f"_show_{sub_command}")()
         except AttributeError:
-            print(f"Unknown 'show' sub-command '{sub_command}'. What do you want to show?\n")
+            error(f"Unknown 'show' sub-command '{sub_command}'. What do you want to show?\n")
 
     def complete_show(self, text, *args, **kwargs):
         if text:
