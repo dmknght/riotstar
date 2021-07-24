@@ -16,5 +16,6 @@ lab_images = [
     ("BrokenWebApp", "OWASP Broken Web Applications", "vulnerables/web-owasp"),
     ("PHPMailer", "PHPMailer < 5.2.18 RCE", "vulnerables/cve-2016-10033"),
     ("ApacheStruts2", "CVE-2017-5638 Apache Struts 2 File Upload", "jrrdev/cve-2017-5638"),
-    ("OracleWebLogic", "CVE-2017-10271 Oracle WebLogic 10.3.6.0.0 WLS-WSAT Deserialization", "kkirsche/cve-2017-10271")
+    ("OracleWebLogic", "CVE-2017-10271 Oracle WebLogic 10.3.6.0.0 WLS-WSAT Deserialization", "kkirsche/cve-2017-10271"),
+    ("Drupal8RCE", "CVE-2019-6340 Drupal RCE", "knqyf263/cve-2019-6340")
 ]
