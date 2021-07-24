@@ -2,7 +2,7 @@ lab_images = [
     ("phpLdapAdmin", "phpLdapAdmin multiple vulns", "vulnerables/phpldapadmin-remote-dump"),
     ("DVWA", "PHP/MySQL vulnerable web app. Default cred: admin/password", "vulnerables/web-dvwa"),
     ("RailsGoat", "Vulnerable WebApp in Ruby on Rails Framework", "vulnerables/web-owasp-railsgoat"),
-    ("SambaCry", "SambaCry RCE vulnerability (CVE-2017-7494 Samba 4.5.9)"),
+    ("SambaCry", "SambaCry RCE vulnerability (CVE-2017-7494 Samba 4.5.9)", "vulnerables/cve-2017-7494"),
     ("HarakaMail", "Haraka mail 2.8.9 RCE", "vulnerables/mail-haraka-2.8.9-rce"),
     ("Shellshock", "CVE 2014-6271 Bashdoor", "vulnerables/cve-2014-6271"),
     ("Heartbleed", "CVE-2014-0160 OpenSSL Data leak", "vulnerables/cve-2014-0160"),
