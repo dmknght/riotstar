@@ -363,4 +363,4 @@ class Interpreter(BaseInterpreter):
             return suggestions
 
     def complete_restart(self, text, *args, **kwargs):
-        return self.complete_run(text, *args, **kwargs)
+        return self.complete_kill(text, *args, **kwargs)
