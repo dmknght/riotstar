@@ -283,7 +283,7 @@ class Interpreter(BaseInterpreter):
         else:
             self.refresh()
             for name in args[0].split():
-                repo = [image.repo for image in self.installed if image.name == name]
+                repo = [image.repo for image in self.running if image.name == name]
                 if repo:
                     result = self.manager.restart(repo[0])
                     if not result:
