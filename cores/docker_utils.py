@@ -38,6 +38,9 @@ class DockerClient(object):
     def remove(self, name):
         self.client.images.remove(name, force=True)
 
+    def restart(self, name):
+        self.client.images.restart(name)
+
     def get_images_status(self):
         # for x in self.client.containers.list():
         #     print(x.image.attrs)

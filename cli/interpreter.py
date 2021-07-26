@@ -277,9 +277,21 @@ class Interpreter(BaseInterpreter):
                 else:
                     error(f"Invalid name {name} to remove")
 
-    # def command_restart(self, *args, **kwargs):
-    #     print("not supported")
-    #     pass
+    def command_restart(self, *args, **kwargs):
+        if not args[0]:
+            error("Image name is required to restart")
+        else:
+            self.refresh()
+            for name in args[0].split():
+                repo = [image.repo for image in self.installed if image.name == name]
+                if repo:
+                    result = self.manager.restart(repo[0])
+                    if not result:
+                        error(f"Failed to restart {name}")
+                    else:
+                        info("Containers restarted")
+                else:
+                    error(f"Invalid name {name}.")
 
     def _show_all(self):
         self.refresh()
@@ -350,5 +362,5 @@ class Interpreter(BaseInterpreter):
         else:
             return suggestions
 
-    # def complete_restart(self, text, *args, **kwargs):
-    #     return self.complete_run(text, *args, **kwargs)
+    def complete_restart(self, text, *args, **kwargs):
+        return self.complete_run(text, *args, **kwargs)
