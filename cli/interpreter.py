@@ -303,11 +303,13 @@ class Interpreter(BaseInterpreter):
 
     def _show_installed(self):
         self.refresh()
-        if len(self.installed) == 0:
+        if len(self.installed + self.running) == 0:
             warn("No images were installed")
         else:
-            headers = ("Name", "Description", "Size")
-            print_table(headers, *[(x.name, x.description, x.size) for x in self.installed])
+            all_installed = [(x.name, x.description, "Stopped", x.size) for x in self.installed]
+            all_installed += [(x.name, x.description, "Running", x.size) for x in self.running]
+            headers = ("Name", "Description", "Status", "Size")
+            print_table(headers, *all_installed)
 
     def _show_running(self):
         self.refresh()
