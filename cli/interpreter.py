@@ -222,7 +222,7 @@ class Interpreter(BaseInterpreter):
                     self.manager.run(repo[0])
                     # info("Containers created in background")
                     if self.manager.is_running(repo[0]):
-                        info("Container started")
+                        info(f"Container started for image {name}")
                     else:
                         error(f"Failed to start {name}")
                 else:
