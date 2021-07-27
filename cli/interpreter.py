@@ -258,7 +258,7 @@ class Interpreter(BaseInterpreter):
             for name in args[0].split():
                 repo = [image.repo for image in self.not_installed if image.name == name]
                 if repo:
-                    info(f"Pulling {args[0]} from {repo[0]}. Please wait...")
+                    info(f"Pulling {name} from {repo[0]}. Please wait...")
                     self.manager.pull(repo[0])
                 else:
                     error(f"Invalid name {name}")
