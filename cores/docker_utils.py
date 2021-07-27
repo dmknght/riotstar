@@ -24,7 +24,7 @@ class DockerClient(object):
         self.client = docker.from_env()
 
     def pull(self, name):
-        return self.client.images.pull(name)
+        return self.client.images.pull(name, tag="latest")
 
     def run(self, name):
         self.client.containers.run(name, detach=True)
