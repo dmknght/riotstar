@@ -298,7 +298,7 @@ class Interpreter(BaseInterpreter):
         self.refresh()
         headers = ("Name", "Status", "Description")
         status_all = [(x.name, "Running", x.description) for x in self.running]
-        status_all += [(x.name, "Installed", x.description) for x in self.installed]
+        status_all += [(x.name, "Stopped", x.description) for x in self.installed]
         status_all += [(x.name, "N/A", x.description) for x in self.not_installed]
         print_table(headers, *status_all)
 
