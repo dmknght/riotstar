@@ -89,7 +89,7 @@ class BaseInterpreter(object):
             try:
                 command, args = self.parse_line(input(self.prompt))
                 if not command:
-                    continue
+                    self.refresh()
                 if command == "exit" or command == "quit":
                     break
                 command_handler = self.get_command_handler(command)
@@ -219,11 +219,12 @@ class Interpreter(BaseInterpreter):
             for name in args[0].split():
                 repo = [image.repo for image in self.installed if image.name == name]
                 if repo:
-                    result = self.manager.run(repo[0])
-                    if not result:
-                        error(f"Failed to run {name}")
+                    self.manager.run(repo[0])
+                    # info("Containers created in background")
+                    if self.manager.is_running(repo[0]):
+                        info("Container started")
                     else:
-                        info("Containers started in background")
+                        error(f"Failed to start {name}")
                 else:
                     if name in [x.name for x in self.running]:
                         warn(f"{name} is running")

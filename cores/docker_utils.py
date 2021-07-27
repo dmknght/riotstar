@@ -27,7 +27,7 @@ class DockerClient(object):
         return self.client.images.pull(name)
 
     def run(self, name):
-        return self.client.containers.run(name, detach=True)
+        self.client.containers.run(name, detach=True)
 
     def kill(self, name):
         self.client.api.kill(name)
@@ -41,9 +41,13 @@ class DockerClient(object):
     def restart(self, name):
         self.client.images.restart(name)
 
+    def is_running(self, name):
+        container_status = self.client.api.containers(filters={"ancestor": name})
+        if container_status[0]["State"] == "running":
+            return True
+        return False
+
     def get_images_status(self):
-        # for x in self.client.containers.list():
-        #     print(x.image.attrs)
         result = []
         for image in cores.lab_images:
             image_object = DockerImage(
