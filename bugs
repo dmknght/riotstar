@@ -1,0 +1,2 @@
+1. Likely container kill didn't work correctly -> remove image doesn't work either. Image is still showing in `docker image ls` and requires force remove
+2. When start container, a container failed to start still shows `running` status. Run `show running` again will show real status.
