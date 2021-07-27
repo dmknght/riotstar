@@ -1,8 +1,8 @@
 lab_images = [
     ("phpLdapAdmin", "phpLdapAdmin multiple vulns", "vulnerables/phpldapadmin-remote-dump"),
-    ("DVWA", "PHP/MySQL vulnerable web app. Default cred: admin/password", "vulnerables/web-dvwa"),
+    ("DVWA", "PHP/MySQL vulnerable web app. Login: admin/password", "vulnerables/web-dvwa"),
     ("RailsGoat", "Vulnerable WebApp in Ruby on Rails Framework", "vulnerables/web-owasp-railsgoat"),
-    ("SambaCry", "SambaCry RCE vulnerability (CVE-2017-7494 Samba 4.5.9)", "vulnerables/cve-2017-7494"),
+    # ("SambaCry", "SambaCry RCE vulnerability (CVE-2017-7494 Samba 4.5.9)", "vulnerables/cve-2017-7494"), # Seems broken
     ("HarakaMail", "Haraka mail 2.8.9 RCE", "vulnerables/mail-haraka-2.8.9-rce"),
     ("Shellshock", "CVE 2014-6271 Bashdoor", "vulnerables/cve-2014-6271"),
     ("Heartbleed", "CVE-2014-0160 OpenSSL Data leak", "vulnerables/cve-2014-0160"),
@@ -17,5 +17,5 @@ lab_images = [
     ("PHPMailer", "PHPMailer < 5.2.18 RCE", "vulnerables/cve-2016-10033"),
     ("ApacheStruts2", "CVE-2017-5638 Apache Struts 2 File Upload", "jrrdev/cve-2017-5638"),
     ("OracleWebLogic", "CVE-2017-10271 Oracle WebLogic 10.3.6.0.0 WLS-WSAT Deserialization", "kkirsche/cve-2017-10271"),
-    ("Drupal8RCE", "CVE-2019-6340 Drupal RCE", "knqyf263/cve-2019-6340")
+    ("Drupal8RCE", "CVE-2019-6340 Drupal RCE", "knqyf263/cve-2019-6340") # good
 ]
