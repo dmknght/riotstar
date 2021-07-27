@@ -17,6 +17,6 @@ lab_images = [
     ("PHPMailer", "PHPMailer < 5.2.18 RCE", "vulnerables/cve-2016-10033"), # ok
     ("ApacheStruts2", "CVE-2017-5638 Apache Struts 2 File Upload", "jrrdev/cve-2017-5638"), # ok
     # ("OracleWebLogic", "CVE-2017-10271 Oracle WebLogic 10.3.6.0.0 WLS-WSAT Deserialization", "kkirsche/cve-2017-10271"), # manifest unknown
-    ("Drupal8RCE", "CVE-2019-6340 Drupal RCE", "knqyf263/cve-2019-6340")  # OK
-    # https://hub.docker.com/r/karthequian/gruyere
+    ("Drupal8RCE", "CVE-2019-6340 Drupal RCE", "knqyf263/cve-2019-6340"),  # OK
+    ("gruyere", "google-gruyere vulnerable web app", "karthequian/gruyere") # OK
 ]
