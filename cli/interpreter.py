@@ -174,13 +174,14 @@ class Interpreter(BaseInterpreter):
             "installed",
         )
         self.main_commands = (
-            ("show", "Show information about images / containers"),
-            ("run", "Start docker containers"),
-            ("kill", "Kill running docker containers"),
-            ("killall", "Kill all running docker containers"),
-            ("pull", "Pull images"),
-            ("help", "Show help menu"),
-            ("exit", "Exit program"),
+            ("show", "running / installed / all", "Show information of containers or images"),
+            ("run", "<image_names>", "Start 1 or multiple docker containers"),
+            ("kill", "<image_names>", "Kill 1 or multiple docker containers"),
+            ("pull ", "<image_names>", "Pull 1 or multiple docker images"),
+            ("remove", "<image_names>", "Remove 1 or multiple docker images"),
+            ("killall", "", "Kill all running docker containers"),
+            ("help", "", "Show help menu"),
+            ("exit", "", "Exit program"),
         )
         self.manager = DockerClient()
         self.refresh()
@@ -208,8 +209,8 @@ class Interpreter(BaseInterpreter):
         return p
 
     def command_help(self, *args, **kwargs):
-        for command, descriptions in self.main_commands:
-            print(f"  {command:15}  {descriptions}")
+        headers = ("Command", "Value", "Description")
+        print_table(headers, *self.main_commands)
 
     def command_run(self, *args, **kwargs):
         if not args[0]:
@@ -231,7 +232,6 @@ class Interpreter(BaseInterpreter):
                     elif name in [x.name for x in self.not_installed]:
                         warn(f"{name} is not installed. Pulling...")
                         self.command_pull(name)
-                        # print("To prevent infinity loop, program doesn't run this image. Please do it manually.")
                         self.command_run(name)
                     else:
                         error(f"Invalid name {name}.")
